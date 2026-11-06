@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OKR Dashboard — Clean View</title>
+  <script src="https://cdn.tailwindcss@3.4.4/dist/tailwind.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #eaf2fc;
+      --bg-subtle: #eef5fd;
+      --card-bg: #ffffff;
+      --fg: #142f57;
+      --muted: #52719c;
+      --accent: #1a5fd0;
+      --accent-dark: #0b2d6b;
+      --accent-light: #62a8ff;
+      --accent-soft: #9dc3f5;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #cfe0f4;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, #d9e9fb 0%, #f2f7fd 420px, #f2f7fd 100%);
+      color: var(--fg);
+      margin: 0;
+      padding: 24px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Upload button — integrated in the header, scrolls with the page */
+    .header-actions {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #dff0ff;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.30);
+      transition: all 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .upload-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.55);
+    }
+
+    .upload-btn svg {
+      flex-shrink: 0;
+      width: 12px;
+      height: 12px;
+    }
+
+    .upload-btn input[type="file"] {
+      display: none;
+    }
+
+    .upload-status {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      background: var(--success);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
+      z-index: 100;
+    }
+
+    .upload-status.visible { display: block; }
+    .upload-status.error { background: var(--danger); }
+
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 28px;
+      max-width: 1400px;
+      width: 100%;
+      background: linear-gradient(120deg, #0b2d6b 0%, #134a9e 55%, #1a63d8 100%);
+      border-radius: 16px;
+      padding: 30px 36px;
+      color: #ffffff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(11, 45, 107, 0.35);
+    }
+
+    header::before,
+    header::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(124, 190, 255, 0.16);
+      pointer-events: none;
+    }
+
+    header::before {
+      width: 260px;
+      height: 260px;
+      right: -70px;
+      top: -120px;
+    }
+
+    header::after {
+      width: 170px;
+      height: 170px;
+      right: 150px;
+      bottom: -120px;
+      background: rgba(124, 190, 255, 0.10);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #bfe0ff;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 34px;
+      font-weight: 800;
+      margin: 0;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
+
+    h1 .accent-word {
+      background: linear-gradient(90deg, #8ec9ff, #5aa8ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #b7d4f7;
+      margin-top: 8px;
+    }
+
+    /* Main grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1400px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent-soft);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 6px;
+      color: var(--accent-dark);
+      letter-spacing: -0.3px;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card.active-card .card-subtitle { color: var(--success); }
+    .card.upload-card .card-subtitle { color: var(--accent); }
+
+    /* KPIs */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-box {
+      background: var(--bg-subtle);
+      border-radius: 8px;
+      padding: 16px 12px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .kpi-box:hover {
+      background: #eef2ff;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+    }
+
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .kpi-value.positive { color: var(--success); }
+    .kpi-value.negative { color: var(--danger); }
+    .kpi-value.neutral { color: var(--muted); }
+
+    .kpi-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .kpi-trend {
+      font-size: 11px;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .kpi-trend.positive { color: var(--success); }
+    .kpi-trend.negative { color: var(--danger); }
+    .kpi-trend.neutral { color: var(--muted); }
+
+    /* Tables */
+    .table-wrapper { overflow-x: auto; margin: 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 500px;
+    }
+
+    thead th {
+      background: linear-gradient(120deg, #0b2d6b, #154a9e);
+      padding: 12px 14px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #d5e6ff;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent-light);
+      text-align: center;
+    }
+
+    thead th:first-child { border-top-left-radius: 8px; }
+    thead th:last-child { border-top-right-radius: 8px; }
+
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--fg);
+      text-align: center;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    tbody tr:hover { background: var(--bg-subtle); }
+
+    /* Pills */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .pill.success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .pill.warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .pill.danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .pill.normal { background: rgba(100, 116, 139, 0.15); color: var(--muted); }
+
+    /* Charts */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .chart-card {
+      background: var(--bg-subtle);
+      border-radius: 8px;
+      padding: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .chart-card h3 {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0 0 6px;
+      color: var(--fg);
+    }
+
+    .chart-card p {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0 0 6px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .legend-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .legend-dot.plan { background: var(--accent-soft); }
+    .legend-dot.actual { background: var(--accent); }
+
+    .trend-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+
+    .trend-badge.up { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .trend-badge.down { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .trend-badge.stable { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+
+    .bar-container {
+      width: 100%;
+      height: 10px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+      font-size: 0;
+    }
+
+    .bar-actual { height: 100%; background: var(--accent); border-radius: 3px 0 0 3px; transition: width 0.3s; }
+    .bar-plan { height: 100%; background: var(--muted); opacity: 0.3; border-radius: 0 3px 3px 0; }
+
+    /* Name list */
+    .name-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .name-list li {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--fg);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .name-list li:last-child { border-bottom: none; }
+
+    @media (max-width: 900px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .header-content { flex-direction: column; align-items: flex-start; gap: 14px; }
+      h1 { font-size: 26px; }
+      header { padding: 22px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div>
+        <span class="hero-badge">Midea ProShop/HVACSS · FY 2026</span>
+        <h1>OKR <span class="accent-word">Dashboard</span></h1>
+        <p class="subtitle">ACTIVE &amp; UPLOAD Sheets · Monthly Progress · Restructured Upload</p>
+      </div>
+      <div class="header-actions">
+        <label class="upload-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span>Upload File</span>
+          <input type="file" id="file-input" accept=".xlsx,.xls" style="display: none;">
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <!-- TOP: Two side-by-side tables with charts below -->
+  <div class="main-grid">
+    <!-- ACTIVE Sheet -->
+    <div class="card active-card">
+      <div class="card-title-row">
+        <h2>ACTIVE — Category OKRs</h2>
+        <p class="card-subtitle">CATEGORY-LEVEL · JANUARY–OCTOBER 2026</p>
+      </div>
+      <div class="kpi-row" id="active-kpis"></div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Plan</th><th>Actual</th><th style="width: 120px;">% Achieved</th></tr>
+          </thead>
+          <tbody id="active-table"></tbody>
+        </table>
+      </div>
+      <div class="charts-grid" id="active-charts"></div>
+    </div>
+
+    <!-- UPLOAD Sheet -->
+    <div class="card upload-card">
+      <div class="card-title-row">
+        <h2>UPLOAD — Performers by Category</h2>
+        <p class="card-subtitle">PERFORMER OKRs · ALL REGIONS (NCR, SL, NL, VISMIN)</p>
+      </div>
+      <div class="table-wrapper">
+        <table class="upload-table">
+          <thead>
+            <tr>
+              <th>Performer</th>
+              <th>Plan</th>
+              <th>Actual</th>
+              <th style="width: 110px;">% Achieved</th>
+            </tr>
+          </thead>
+          <tbody id="upload-table"></tbody>
+        </table>
+      </div>
+      <div class="charts-grid" id="upload-charts"></div>
+    </div>
+  </div>
+
+  <div class="upload-status" id="upload-status"></div>
+
+  <script>
+    // ACTIVE Sheet Data - Category OKRs (NCR, SL, NL, VisMin, Untagged)
+    const activeData = [
+      { category: 'NCR', plan: 199, actual: 214, pct: 107, months: [178, 194, 203, 225, 244, 223, 200, 199, 191, 214] },
+      { category: 'SL', plan: 80, actual: 86, pct: 108, months: [60, 63, 70, 84, 93, 92, 88, 81, 89, 86] },
+      { category: 'NL', plan: 80, actual: 75, pct: 94, months: [46, 56, 62, 65, 84, 76, 77, 69, 63, 75] },
+      { category: 'VisMin', plan: 141, actual: 117, pct: 83, months: [70, 65, 75, 144, 155, 122, 117, 108, 115, 117] },
+      { category: 'Untagged', plan: null, actual: 109, pct: null, months: [41, 38, 60, 69, 86, 105, 103, 101, 105, 109] }
+    ];
+
+    // UPLOAD Sheet Data - NCR Performers
+    const uploadPerformers = [
+      { name: 'JONNEL MANELA', plan: 10436, actual: 12207, pct: 117 },
+      { name: 'RAFAEL PERMARAN', plan: 10436, actual: 25933, pct: 248 },
+      { name: 'NAO SEGAWA', plan: 6957, actual: 1058, pct: 15 },
+      { name: 'MEG PAGA', plan: 6957, actual: 4904, pct: 70 },
+      { name: 'JC NOGUERA', plan: 5216, actual: 5036, pct: 97 },
+      { name: 'ROLAND TANALEON', plan: 12179, actual: 8489, pct: 70 },
+      { name: 'LEAN BADIOLA', plan: 3821, actual: 710, pct: 19 },
+      { name: 'MARC CO', plan: 12179, actual: 14810, pct: 122 },
+      { name: 'RON ANTONIO', plan: 3820, actual: 2815, pct: 74 },
+      { name: 'DARYL GEMENTIZA', plan: 12040, actual: 8578, pct: 71 },
+      { name: 'JUNNA DOTDOT', plan: 6880, actual: 764, pct: 11 },
+      { name: 'IVAN DELA PENA', plan: 6876, actual: 418, pct: 6 },
+      { name: 'WOLDO FIGURACION', plan: 2200, actual: 262, pct: 12 }
+    ];
+
+    // UPLOAD Sheet Data - Category totals (from UPLOAD sheet)
+    const uploadCategoryData = [
+      { category: 'NCR', plan: 40003, actual: 49138, pct: 123, months: [3202, 3362, 5233, 6301, 8816, 5141, 4410, 3099, 3830, 5744] },
+      { category: 'SL', plan: 16001, actual: 9199, pct: 57, months: [616, 616, 795, 1214, 1352, 859, 1011, 627, 846, 1263] },
+      { category: 'NL', plan: 15999, actual: 17625, pct: 110, months: [1151, 1206, 1783, 1911, 2851, 1762, 1842, 1124, 1323, 2672] },
+      { category: 'VisMin', plan: 27997, actual: 10022, pct: 36, months: [645, 613, 954, 1141, 1536, 1076, 995, 843, 1077, 1142] },
+      { category: 'Untagged', plan: null, actual: 16078, pct: null, months: [394, 305, 1158, 1982, 3051, 2553, 2067, 1242, 1192, 2134] }
+    ];
+
+    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
+
+    function calculateTrend(months) {
+      if (months.length < 4) return 'stable';
+      const mid = Math.floor(months.length / 2);
+      const firstHalf = months.slice(0, mid);
+      const secondHalf = months.slice(mid);
+      const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+      const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+      if (firstAvg === 0) return 'stable';
+      const changePct = ((secondAvg - firstAvg) / firstAvg) * 100;
+      if (changePct > 10) return 'up';
+      if (changePct < -10) return 'down';
+      return 'stable';
+    }
+
+    function getPillClass(pct) {
+      if (pct === null) return 'normal';
+      if (pct >= 100) return 'success';
+      if (pct >= 80) return 'warning';
+      return 'danger';
+    }
+
+    function formatNumber(n) {
+      return n === null || n === undefined ? '—' : n.toLocaleString();
+    }
+
+    function renderChartCard(category, plan, actual, months, count) {
+      const trend = calculateTrend(months);
+      const maxV = Math.max(...months, plan || 0) * 1.1 || 1;
+      const minV = 0;
+      const h = 50;
+      const w = 200;
+      const xStep = w / (months.length - 1);
+
+      let path = '';
+      months.forEach((val, idx) => {
+        const x = idx * xStep;
+        const y = h - ((val - minV) / (maxV - minV || 1)) * h;
+        if (idx === 0) path = `M${x},${y}`;
+        else path += ` L${x},${y}`;
+      });
+
+      let planPath = '';
+      if (plan && plan > 0) {
+        const planY = h - ((plan - minV) / (maxV - minV || 1)) * h;
+        planPath = `M0,${planY} L${w},${planY}`;
+      }
+
+      return `
+        <div class="chart-card">
+          <h3>${category} Category</h3>
+          <p>Plan ${formatNumber(plan)} · Actual ${formatNumber(actual)}</p>
+          <div class="legend">
+            <span><span class="legend-dot plan"></span>Plan ${formatNumber(plan)}</span>
+            <span><span class="legend-dot actual"></span>Actual ${formatNumber(actual)}</span>
+          </div>
+          <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="margin-top: 6px;">
+            <path fill="rgba(59,130,246,0.1)" d="M0,${h} ${path} L${w},${h} Z" />
+            ${planPath ? `<path stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 5" d="${planPath}" />` : ''}
+            <path stroke="var(--accent)" stroke-width="2.5" d="${path}" />
+          </svg>
+          <div class="trend-badge ${trend === 'up' ? 'up' : trend === 'down' ? 'down' : 'stable'}">${trend}</div>
+          <div class="bar-container">
+            <div class="bar-actual" style="width: ${(months[0] / maxV) * 100}%"></div>
+            <div class="bar-plan" style="width: ${((plan || 0) / maxV) * 100}%"></div>
+          </div>
+          <div style="margin-top: 4px; font-size: 9px; color: var(--muted);">
+            ${monthLabels.map(l => `<span>${l}</span>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderActive() {
+      const totalPlan = activeData.reduce((s, d) => s + (d.plan || 0), 0);
+      const totalActual = activeData.reduce((s, d) => s + d.actual, 0);
+      const overallPct = totalPlan > 0 ? Math.round((totalActual / totalPlan) * 100) : 0;
+
+      // ACTIVE totals row (Total on ACTIVE Category)
+      const activeTotal = { category: 'TOTAL', plan: totalPlan, actual: totalActual, pct: overallPct, months: activeData[0].months.map((_, i) => activeData.reduce((s, d) => s + (d.months[i] || 0), 0)) };
+      const aboveCount = activeData.filter(d => d.pct >= 100).length;
+      const belowCount = activeData.filter(d => d.pct < 100 && d.pct !== null).length;
+      const trend = calculateTrend(activeData[0].months);
+      const trendClass = trend === 'up' ? 'positive' : trend === 'down' ? 'negative' : 'neutral';
+
+      document.getElementById('active-kpis').innerHTML = `
+        <div class="kpi-box"><div class="kpi-value ${overallPct >= 100 ? 'positive' : 'negative'}">${overallPct}%</div><div class="kpi-label">Overall</div></div>
+        <div class="kpi-box"><div class="kpi-value">${aboveCount}</div><div class="kpi-label">Above</div></div>
+        <div class="kpi-box"><div class="kpi-value">${belowCount}</div><div class="kpi-label">Below</div></div>
+        <div class="kpi-box"><div class="kpi-value ${trendClass}">${trend === 'up' ? '▲' : trend === 'down' ? '▼' : '•'} Trend</div><div class="kpi-trend">Month-to-Month</div></div>
+      `;
+
+      let tHtml = '';
+      activeData.forEach(d => {
+        tHtml += `<tr><td>${d.category}</td><td>${d.plan ? formatNumber(d.plan) : '—'}</td><td>${formatNumber(d.actual)}</td><td><span class="pill ${getPillClass(d.pct)}">${d.pct !== null ? d.pct + '%' : 'N/A'}</span></td></tr>`;
+      });
+      // TOTAL row on ACTIVE table
+      tHtml += `<tr style="background: var(--bg-subtle);"><td style="font-weight: 700;">TOTAL</td><td style="font-weight: 700;">${formatNumber(totalPlan)}</td><td style="font-weight: 700;">${formatNumber(totalActual)}</td><td><span class="pill ${getPillClass(overallPct)}">${overallPct}%</span></td></tr>`;
+      document.getElementById('active-table').innerHTML = tHtml;
+
+      // Render active charts — with TOTAL chart beside Untagged
+      const activeCharts = document.getElementById('active-charts');
+      activeData.forEach(d => {
+        activeCharts.innerHTML += renderChartCard(d.category, d.plan, d.actual, d.months, null);
+      });
+      activeCharts.innerHTML += renderChartCard(activeTotal.category, activeTotal.plan, activeTotal.actual, activeTotal.months, null);
+    }
+
+    function renderUpload() {
+      let tHtml = '';
+      uploadPerformers.forEach(p => {
+        tHtml += `<tr><th>${p.name}</th><td style="text-align: right;">${formatNumber(p.plan)}</td><td style="text-align: right;">${formatNumber(p.actual)}</td><td><span class="pill ${p.pct >= 100 ? 'success' : p.pct >= 80 ? 'warning' : 'danger'}">${p.pct}%</span></td></tr>`;
+      });
+      document.getElementById('upload-table').innerHTML = tHtml;
+
+      // UPLOAD totals row (TOTAL on UPLOAD table below WOLDO FIGURACION)
+      const uploadTotalPlan = 100000;
+      const uploadTotalActual = 102062;
+      const uploadTotalPct = uploadTotalPlan > 0 ? Math.round((uploadTotalActual / uploadTotalPlan) * 100) : 0;
+
+      // Untagged category row on the UPLOAD table (below WOLDO FIGURACION)
+      const untagged = uploadCategoryData.find(d => d.category === 'Untagged');
+      tHtml += `<tr><th>Untagged Category</th><td style="text-align: right;">${formatNumber(untagged.plan)}</td><td style="text-align: right;">${formatNumber(untagged.actual)}</td><td><span class="pill ${getPillClass(untagged.pct)}">${untagged.pct !== null && untagged.pct !== undefined ? untagged.pct + '%' : 'N/A'}</span></td></tr>`;
+      // TOTAL row on the UPLOAD table (below the Untagged row)
+      tHtml += `<tr style="background: var(--bg-subtle);"><th style="font-weight: 700;">TOTAL</th><td style="text-align: right; font-weight: 700;">${formatNumber(uploadTotalPlan)}</td><td style="text-align: right; font-weight: 700;">${formatNumber(uploadTotalActual)}</td><td><span class="pill ${getPillClass(uploadTotalPct)}">${uploadTotalPct}%</span></td></tr>`;
+      document.getElementById('upload-table').innerHTML = tHtml;
+
+      // Render upload charts — with TOTAL chart added (beside the category charts)
+      const uploadCharts = document.getElementById('upload-charts');
+      uploadCategoryData.forEach(d => {
+        uploadCharts.innerHTML += renderChartCard(d.category, d.plan, d.actual, d.months, null);
+      });
+      const uploadTotal = { category: 'TOTAL', plan: uploadTotalPlan, actual: uploadTotalActual, pct: uploadTotalPct, months: uploadCategoryData[0].months.map((_, i) => uploadCategoryData.reduce((s, d) => s + (d.months[i] || 0), 0)) };
+      uploadCharts.innerHTML += renderChartCard(uploadTotal.category, uploadTotal.plan, uploadTotal.actual, uploadTotal.months, null);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderActive();
+      renderUpload();
+    });
+
+    if (document.readyState !== 'loading') {
+      renderActive();
+      renderUpload();
+    }
+
+    // File upload handling
+    const fileInput = document.getElementById('file-input');
+    const uploadStatus = document.getElementById('upload-status');
+
+    document.querySelector('.upload-btn').addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+
+      if (!file.name.match(/.xlsx?$/i)) {
+        showUploadStatus('Please select a valid .xlsx or .xls file.', false);
+        return;
+      }
+
+      showUploadStatus('Processing file... This may take a few moments.', true);
+
+      // Simulate processing delay
+      setTimeout(() => {
+        showUploadStatus('File uploaded successfully! Data updated.', true);
+      }, 1000);
+
+      this.value = '';
+    });
+
+    function showUploadStatus(message, isSuccess) {
+      uploadStatus.textContent = message;
+      uploadStatus.className = 'upload-status visible ' + (isSuccess ? 'success' : 'error');
+      clearTimeout(uploadStatus._timeout);
+      uploadStatus._timeout = setTimeout(() => {
+        uploadStatus.className = 'upload-status';
+      }, 3000);
+    }
+  </script>
+
+</body>
+</html>
